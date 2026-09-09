@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Submit media or a public link for Truesight AI analysis." />
+    <title>Analyze media — Truesight AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="index.html"><span class="brand-mark"><i></i></span><span>TRUESIGHT <b>AI</b></span></a>
+      <nav aria-label="Main navigation"><a href="index.html">Home</a><a class="active" href="analyze.html">Analyze</a><a href="reports.html">Reports</a><a href="history.html">History</a><a href="how-it-works.html">How it works</a></nav>
+      <button class="icon-button" aria-label="Notifications"><span class="notification-dot"></span><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg></button>
+    </header>
+    <main>
+      <section class="subhero">
+        <div class="eyebrow"><span></span> START A NEW CHECK</div>
+        <h1>Run an <em>examination.</em></h1>
+        <p>Upload a photo, clip, or voice note — or bring in a public link. You will get a clear verdict with the evidence behind it.</p>
+      </section>
+      <section class="analysis-shell" aria-labelledby="new-check-title">
+        <div class="section-label"><span>01</span><h2 id="new-check-title">New examination</h2><div></div><p>Private and secure</p></div>
+        <div class="page-grid">
+          <article class="ingest-card card">
+            <div class="card-heading"><div><span class="mono-label">MEDIA INTAKE</span><h3>Choose what to examine</h3></div><span class="secure-label"><svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.55 2.98 8.86 7 10 4.02-1.14 7-5.45 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg> PROTECTED</span></div>
+            <div class="intake-tabs" role="tablist"><button class="intake-tab active" data-intake="upload"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4 4 4M5 14v5h14v-5"/></svg> Upload a file</button><button class="intake-tab" data-intake="link"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07.07l2-2A5 5 0 0 0 12 4l-1.15 1.15M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.15-1.15"/></svg> Import a link</button></div>
+            <div class="intake-pane active" data-pane="upload"><label class="drop-zone" id="drop-zone" for="file-input"><input id="file-input" type="file" accept="image/*,video/*,audio/*"/><span class="drop-icon"><svg viewBox="0 0 24 24"><path d="M12 15V3m0 0L8 7m4-4 4 4M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/></svg></span><strong>Drop media here</strong><span>or <b>browse your device</b></span><small>IMAGE · VIDEO · AUDIO &nbsp; | &nbsp; MAX 500 MB</small></label><div class="selected-input" id="file-selection" hidden><span class="file-type-icon" id="file-type-icon">IMG</span><div><strong id="file-name">sample.jpg</strong><span id="file-meta">12.4 MB · Image</span></div><button id="clear-file" aria-label="Remove selected file">×</button></div></div>
+            <div class="intake-pane" data-pane="link"><div class="link-field-wrap"><label for="media-url">Paste a public media link</label><div class="url-control"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07.07l2-2A5 5 0 0 0 12 4l-1.15 1.15M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.15-1.15"/></svg><input id="media-url" type="url" placeholder="https://www.youtube.com/watch?v=..." /></div><p>Only publicly accessible media is fetched. We never access private profiles or messages.</p></div><div class="source-row"><span>SUPPORTED SOURCES</span><button class="source-chip" data-url="https://www.youtube.com/watch?v=media">YouTube</button><button class="source-chip" data-url="https://x.com/source/status/123">X</button><button class="source-chip" data-url="https://www.instagram.com/reel/media">Instagram</button><button class="source-chip" data-url="https://www.tiktok.com/@source/video/123">TikTok</button></div><div class="url-insight" id="url-insight"><span class="status-orb"></span><span>Enter a public URL to validate its source and extract media.</span></div></div>
+            <div class="privacy-note"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="M9 12l2 2 4-4"/></svg><span>Your media is deleted after analysis.</span></div>
+            <button class="analyze-button" id="analyze-button"><span>Analyze media</span><svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button><p class="form-message" id="form-message" aria-live="polite"></p>
+          </article>
+          <aside class="scanner-card card"><div class="scanner-top"><span class="mono-label">CHECK STATUS</span><span class="live-status"><i></i> READY</span></div><div class="scanner-visual"><div class="scan-grid"></div></div><div class="scanner-readout"><div><span>ANALYSIS PIPELINE</span><b id="pipeline-name">Standing by</b></div><div class="readout-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="model-list"><p><span>Visual analysis</span><b>READY</b></p><p><span>Frame analysis</span><b>READY</b></p><p><span>Voice analysis</span><b>READY</b></p></div></aside>
+        </div>
+      </section>
+      <section class="progress-section" id="progress-section"><div class="section-label"><span>02</span><h2>Forensic scan</h2><div></div><p id="progress-state">Waiting for media</p></div><div class="progress-panel card"><div class="progress-header"><div><span class="mono-label">ANALYSIS STATUS</span><h3 id="progress-heading">Ready when you are</h3></div><span class="progress-number" id="progress-number">00%</span></div><div class="progress-track"><i id="progress-fill"></i></div><ol class="pipeline-steps"><li data-step="1"><span></span><div><b>Media validated</b><small>File integrity checked</small></div><em>—</em></li><li data-step="2"><span></span><div><b>Forensic regions extracted</b><small>Relevant signals isolated</small></div><em>—</em></li><li data-step="3"><span></span><div><b>Neural analysis completed</b><small>Confidence calculated</small></div><em>—</em></li><li data-step="4"><span></span><div><b>Report generated</b><small>Evidence is ready</small></div><em>—</em></li></ol></div></section>
+      <div class="empty-callout card" id="complete-callout" hidden><div><h3>Your examination is ready.</h3><p>Open the report to review the verdict, evidence, and confidence score.</p></div><a class="outline-link" href="reports.html">Open report <svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></a></div>
+    </main>
+    <footer><a class="brand" href="index.html"><span class="brand-mark"><i></i></span><span>TRUESIGHT <b>AI</b></span></a><p>Verification intelligence for a more trustworthy internet.</p><span>© 2026 TRUESIGHT AI</span></footer>
+    <script src="analyze-page.js"></script>
+  </body>
+</html>

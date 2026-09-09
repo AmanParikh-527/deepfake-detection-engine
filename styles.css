@@ -1,0 +1,319 @@
+/* =========================================================
+   TRUESIGHT AI — HERO VISUAL UPGRADE
+   Paste at the VERY BOTTOM of the ROOT styles.css file
+========================================================= */
+
+
+/* HERO TITLE */
+
+.truesight-hero-title {
+    font-size: clamp(4.5rem, 7vw, 8rem);
+    line-height: 0.9;
+    letter-spacing: -0.065em;
+    margin-bottom: 28px;
+    font-weight: 700;
+}
+
+.truesight-hero-title em {
+    font-style: normal;
+    color: #6366f1;
+}
+
+
+/* =========================================================
+   HERO FORENSIC VISUAL
+========================================================= */
+
+.hero-visual {
+    position: relative;
+    min-height: 520px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* OUTER GLOW */
+
+.forensic-orb {
+    position: absolute;
+    width: 430px;
+    height: 430px;
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle at 50% 40%,
+            rgba(99, 102, 241, 0.28),
+            rgba(99, 102, 241, 0.12) 45%,
+            rgba(99, 102, 241, 0.03) 70%,
+            transparent 72%
+        );
+
+    animation: orbPulse 4s ease-in-out infinite;
+
+    filter: blur(1px);
+}
+
+
+/* FACE */
+
+.ts-face {
+    position: relative;
+
+    width: 52%;
+    height: 68%;
+
+    min-width: 250px;
+    min-height: 340px;
+
+    border: 2px solid rgba(99, 102, 241, 0.85);
+
+    border-radius: 48% 48% 42% 42%;
+
+    box-shadow:
+        0 0 18px rgba(99, 102, 241, 0.30),
+        0 0 60px rgba(99, 102, 241, 0.18),
+        inset 0 0 35px rgba(99, 102, 241, 0.08);
+
+    animation: faceFloat 5s ease-in-out infinite;
+
+    overflow: hidden;
+}
+
+
+/* FACE SCAN LINES */
+
+.ts-face::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        repeating-linear-gradient(
+            to bottom,
+            transparent 0px,
+            transparent 12px,
+            rgba(99, 102, 241, 0.08) 13px,
+            transparent 14px
+        );
+
+    pointer-events: none;
+}
+
+
+/* SCANNING LINE */
+
+.ts-face::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+
+    height: 3px;
+
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(99, 102, 241, 0.95),
+        transparent
+    );
+
+    box-shadow:
+        0 0 10px rgba(99, 102, 241, 0.9),
+        0 0 25px rgba(99, 102, 241, 0.5);
+
+    animation: scanFace 3s linear infinite;
+}
+
+
+/* =========================================================
+   EYES
+========================================================= */
+
+.ts-eye {
+    position: absolute;
+
+    width: 14px;
+    height: 14px;
+
+    border-radius: 50%;
+
+    background: #6366f1;
+
+    box-shadow:
+        0 0 10px #6366f1,
+        0 0 25px rgba(99, 102, 241, 0.8);
+
+    top: 35%;
+
+    animation: eyePulse 2s ease-in-out infinite;
+}
+
+
+.ts-eye.left {
+    left: 27%;
+}
+
+
+.ts-eye.right {
+    right: 27%;
+}
+
+
+/* =========================================================
+   FACE DETECTION BOXES
+========================================================= */
+
+.face-box {
+    position: absolute;
+
+    border: 1px solid rgba(99, 102, 241, 0.7);
+
+    width: 55px;
+    height: 55px;
+
+    animation: boxBlink 2s ease-in-out infinite;
+}
+
+
+.face-box.one {
+    top: 15%;
+    left: 12%;
+}
+
+
+.face-box.two {
+    top: 55%;
+    right: 10%;
+
+    animation-delay: 0.7s;
+}
+
+
+.face-box.three {
+    bottom: 10%;
+    left: 18%;
+
+    animation-delay: 1.2s;
+}
+
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes orbPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.75;
+    }
+
+    50% {
+        transform: scale(1.08);
+        opacity: 1;
+    }
+}
+
+
+@keyframes faceFloat {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-12px);
+    }
+}
+
+
+@keyframes scanFace {
+
+    0% {
+        top: 0%;
+    }
+
+    100% {
+        top: 100%;
+    }
+}
+
+
+@keyframes eyePulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    50% {
+        transform: scale(1.5);
+        opacity: 1;
+    }
+}
+
+
+@keyframes boxBlink {
+
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+
+/* =========================================================
+   RESPONSIVE DESIGN
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .truesight-hero-title {
+        font-size: clamp(3.5rem, 12vw, 6rem);
+    }
+
+    .hero-visual {
+        min-height: 420px;
+    }
+
+    .forensic-orb {
+        width: 330px;
+        height: 330px;
+    }
+
+    .ts-face {
+        min-width: 210px;
+        min-height: 290px;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .hero-visual {
+        min-height: 350px;
+    }
+
+    .forensic-orb {
+        width: 280px;
+        height: 280px;
+    }
+
+    .ts-face {
+        min-width: 180px;
+        min-height: 250px;
+    }
+}

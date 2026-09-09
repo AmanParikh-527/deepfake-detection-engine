@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Truesight AI - explainable deepfake and synthetic media detection." />
+    <title>Truesight AI — Verify before you trust</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-noise"></div>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Truesight AI home">
+        <span class="brand-mark" aria-hidden="true"><i></i></span>
+        <span>TRUESIGHT <b>AI</b></span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a class="active" href="index.html">Home</a>
+        <a href="analyze.html">Analyze</a>
+        <a href="reports.html">Reports</a>
+        <a href="history.html">History</a>
+        <a href="how-it-works.html">How it works</a>
+      </nav>
+      <button class="icon-button" aria-label="Open notifications">
+        <span class="notification-dot"></span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg>
+      </button>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="eyebrow"><span></span> MULTIMODAL FORENSICS ENGINE <small>v2.4 LIVE</small></div>
+        <h1 id="hero-title">Verify before<br /><em>you trust.</em></h1>
+        <p>Understand if the media in front of you is real, manipulated, or AI-generated — with evidence you can inspect.</p>
+        <div class="trust-row" aria-label="Supported media">
+          <span><i class="pulse"></i> Image analysis</span>
+          <span><i class="pulse"></i> Video analysis</span>
+          <span><i class="pulse"></i> Voice analysis</span>
+        </div>
+      </section>
+
+      <section class="analysis-shell" id="analyze" aria-labelledby="analyze-title">
+        <div class="section-label"><span>01</span><h2 id="analyze-title">New examination</h2><div></div><p>Secure, private analysis</p></div>
+        <div class="analysis-grid">
+          <article class="ingest-card card">
+            <div class="card-heading">
+              <div>
+                <span class="mono-label">MEDIA INTAKE</span>
+                <h3>What would you like to verify?</h3>
+              </div>
+              <span class="secure-label"><svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.55 2.98 8.86 7 10 4.02-1.14 7-5.45 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg> ENCRYPTED</span>
+            </div>
+
+            <div class="intake-tabs" role="tablist" aria-label="Media input method">
+              <button class="intake-tab active" data-intake="upload" role="tab" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L8 8m4-4 4 4M5 14v5h14v-5"/></svg> Upload a file</button>
+              <button class="intake-tab" data-intake="link" role="tab" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07.07l2-2A5 5 0 0 0 12 4l-1.15 1.15M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.15-1.15"/></svg> Import from a link</button>
+            </div>
+
+            <div class="intake-pane active" id="upload-pane" data-pane="upload">
+              <label class="drop-zone" id="drop-zone" for="file-input">
+                <input id="file-input" type="file" accept="image/*,video/*,audio/*" />
+                <span class="drop-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15V3m0 0L8 7m4-4 4 4M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/></svg></span>
+                <strong>Drop media here</strong>
+                <span>or <b>browse your device</b></span>
+                <small>IMAGE · VIDEO · AUDIO &nbsp; | &nbsp; MAX 500 MB</small>
+              </label>
+              <div class="selected-input" id="file-selection" hidden>
+                <span class="file-type-icon" id="file-type-icon">IMG</span>
+                <div><strong id="file-name">sample.jpg</strong><span id="file-meta">12.4 MB · Image</span></div>
+                <button id="clear-file" aria-label="Remove selected file">×</button>
+              </div>
+            </div>
+
+            <div class="intake-pane" id="link-pane" data-pane="link">
+              <div class="link-field-wrap">
+                <label for="media-url">Paste a media link</label>
+                <div class="url-control">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.07.07l2-2A5 5 0 0 0 12 4l-1.15 1.15M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 12 20l1.15-1.15"/></svg>
+                  <input id="media-url" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="url" />
+                </div>
+                <p>We will fetch the publicly accessible media only. Private accounts and pages are never accessed.</p>
+              </div>
+              <div class="source-row">
+                <span>SUPPORTED SOURCES</span>
+                <button class="source-chip" data-url="https://www.youtube.com/watch?v=media">YouTube</button>
+                <button class="source-chip" data-url="https://x.com/verified/status/123">X</button>
+                <button class="source-chip" data-url="https://www.instagram.com/reel/media">Instagram</button>
+                <button class="source-chip" data-url="https://www.tiktok.com/@source/video/123">TikTok</button>
+                <button class="source-chip" data-url="https://drive.google.com/file/d/media">Drive</button>
+              </div>
+              <div class="url-insight" id="url-insight"><span class="status-orb"></span><span>Enter a public URL to validate its source and extract media.</span></div>
+            </div>

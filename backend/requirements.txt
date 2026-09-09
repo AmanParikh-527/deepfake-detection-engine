@@ -5,3 +5,12 @@ opencv-python
 pillow
 transformers
 torch
+httpx
+torch>=2.0
+torchaudio>=2.0
+transformers>=4.30
+librosa>=0.10
+soundfile>=0.12
+scipy>=1.10
+numpy>=1.24
+matplotlib>=3.7

@@ -41,14 +41,59 @@ select('#clear-file').addEventListener('click', () => { pickedFile = null; selec
 ['dragleave', 'drop'].forEach((eventName) => select('#drop-zone').addEventListener(eventName, (event) => { event.preventDefault(); select('#drop-zone').classList.remove('dragover'); }));
 select('#drop-zone').addEventListener('drop', (event) => selectFile(event.dataTransfer.files[0]));
 selectAll('.source-chip').forEach((chip) => chip.addEventListener('click', () => { select('#media-url').value = chip.dataset.url; }));
-select('#analyze-button').addEventListener('click', () => {
+select('#analyze-button').addEventListener('click', async () => {
   const onLinkTab = select('[data-pane="link"]').classList.contains('active');
-  const hasUrl = /^https:\/\//.test(select('#media-url').value.trim());
-  if ((!onLinkTab && !pickedFile) || (onLinkTab && !hasUrl)) { select('#form-message').textContent = onLinkTab ? 'Add a public URL to begin.' : 'Choose a media file to begin.'; return; }
+  const socialUrl = select('#media-url').value.trim();
+  if (onLinkTab && !/^https:\/\//.test(socialUrl)) {
+    select('#form-message').textContent = 'Add a complete public social-media URL to begin.';
+    return;
+  }
+  if (!onLinkTab && !pickedFile) {
+    select('#form-message').textContent = 'Choose a video file to begin.';
+    return;
+  }
   const button = select('#analyze-button');
-  button.disabled = true; button.querySelector('span').textContent = 'Analyzing media';
+  button.disabled = true;
+  const mediaType = onLinkTab ? 'Image' : classify(pickedFile)[1];
+  button.querySelector('span').textContent = onLinkTab ? 'Extracting social image' : `Analyzing ${mediaType.toLowerCase()}`;
   select('#pipeline-name').textContent = 'Examination in progress';
   select('#progress-section').scrollIntoView({behavior: 'smooth', block: 'center'});
-  [[22, 1, 'Validating media'], [51, 2, 'Extracting relevant signals'], [78, 3, 'Reviewing authenticity'], [100, 4, 'Preparing your report']].forEach(([value, step, label], index) => setTimeout(() => setProgress(value, step, label), 400 + index * 700));
-  setTimeout(() => { button.disabled = false; button.querySelector('span').textContent = 'Analyze another file'; select('#pipeline-name').textContent = 'Examination complete'; select('#progress-state').textContent = 'Report complete'; select('#complete-callout').hidden = false; select('#complete-callout').scrollIntoView({behavior: 'smooth', block: 'center'}); }, 3400);
+  setProgress(15, 1, `Uploading and validating ${mediaType.toLowerCase()}`);
+
+  try {
+    let response;
+    if (onLinkTab) {
+      response = await fetch('/api/analyze-social-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: socialUrl }),
+      });
+    } else {
+      const formData = new FormData();
+      formData.append('file', pickedFile);
+      response = await fetch('/api/analyze-deepfake', { method: 'POST', body: formData });
+    }
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.detail || result.error || 'The analysis could not be completed.');
+
+    setProgress(100, 4, 'Preparing your report');
+    const savedReport = {
+      ...result,
+      filename: onLinkTab ? new URL(socialUrl).hostname : pickedFile.name,
+      source: onLinkTab ? 'Social link' : 'Upload',
+      media_type: mediaType,
+      analyzedAt: new Date().toISOString(),
+    };
+    sessionStorage.setItem('truesight:last-report', JSON.stringify(savedReport));
+    const history = JSON.parse(localStorage.getItem('truesight:reports') || '[]');
+    localStorage.setItem('truesight:reports', JSON.stringify([savedReport, ...history].slice(0, 20)));
+    window.location.href = 'report.html';
+  } catch (error) {
+    select('#form-message').textContent = error.message || 'Unable to reach the detection API.';
+    select('#pipeline-name').textContent = 'Analysis failed';
+    setProgress(0, 0, 'Ready when you are');
+  } finally {
+    button.disabled = false;
+    button.querySelector('span').textContent = 'Analyze media';
+  }
 });

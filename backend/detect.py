@@ -1,5 +1,6 @@
 import argparse
 import base64
+import io
 import os
 import subprocess
 import sys
@@ -158,6 +159,33 @@ def analyze_video_pipeline(video_path: str, sample_rate_fps: int = 1) -> dict:
         "audio_extracted": audio_path is not None,
         "audio_path": audio_path,
         "evidence_frame_base64": peak_frame_b64,
+    }
+
+
+def analyze_image_pipeline(image_path: str) -> dict:
+    """Evaluates a still image with the same deepfake classifier used for video frames."""
+    try:
+        with Image.open(image_path) as image:
+            rgb_image = image.convert("RGB")
+            results = detector(rgb_image)
+            fake_score = next(
+                (result["score"] for result in results if result["label"].lower() == "fake"),
+                0.0,
+            )
+            evidence = io.BytesIO()
+            rgb_image.save(evidence, format="JPEG", quality=90)
+    except Exception as exc:
+        return {"error": f"Invalid or unreadable image file: {exc}"}
+
+    is_manipulated = fake_score > 0.50
+    return {
+        "verdict": "AI-Generated / Manipulated" if is_manipulated else "Likely Authentic",
+        "visual_confidence_score": round(fake_score * 100, 2),
+        "peak_anomaly_score": round(fake_score * 100, 2),
+        "frames_analyzed": 1,
+        "audio_extracted": False,
+        "audio_path": None,
+        "evidence_frame_base64": base64.b64encode(evidence.getvalue()).decode("utf-8"),
     }
 
 

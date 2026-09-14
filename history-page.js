@@ -14,14 +14,14 @@ function renderHistory() {
   }
   historyBody.innerHTML = reports.map((report, index) => {
     const synthetic = report.verdict === 'AI-Generated / Manipulated';
-    const type = report.media_type || (report.source === 'Social link' ? 'Image' : 'Video');
-    const icon = type === 'Audio' ? '◔' : type === 'Image' ? '◈' : '▶';
+    const type = 'Image';
+    const icon = '◈';
     const confidence = synthetic ? Number(report.visual_confidence_score || 0) : 100 - Number(report.visual_confidence_score || 0);
     return `<tr data-report-index="${index}"><td><div class="media-name"><span class="media-icon ${type.toLowerCase()}">${icon}</span><b>${escapeHtml(report.filename || 'Untitled')}</b></div></td><td><span class="source-badge">${escapeHtml(report.source || 'Upload')}</span></td><td>${type}</td><td><span class="result-tag ${synthetic ? 'synthetic' : 'authentic'}">${synthetic ? 'Synthetic' : 'Authentic'}</span></td><td><b>${confidence.toFixed(1)}%</b></td><td>${new Date(report.analyzedAt).toLocaleString()}</td></tr>`;
   }).join('');
   historyBody.querySelectorAll('tr[data-report-index]').forEach((row) => row.addEventListener('click', () => {
     sessionStorage.setItem('truesight:last-report', JSON.stringify(reports[Number(row.dataset.reportIndex)]));
-    window.location.href = 'report.html';
+    window.location.href = 'reports.html';
   }));
 }
 

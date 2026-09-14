@@ -2,11 +2,13 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.py" }
+  ],
   "functions": {
     "api/index.py": {
       "maxDuration": 300,
-      "includeFiles": "api/haarcascade_frontalface_default.xml",
-      "excludeFiles": "{.git/**,frontend/**,models/**,**/__pycache__/**,**/*.pyc,*.MOV}"
+      "includeFiles": "api/haarcascade_frontalface_default.xml"
     }
   },
   "headers": [
@@ -14,7 +16,7 @@
       "source": "/(.*)",
       "headers": [
         { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
       ]
     }

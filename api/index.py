@@ -22,6 +22,8 @@ import numpy as np
 import torch
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, HttpUrl
 from transformers import pipeline
@@ -344,3 +346,54 @@ def analyze_social_image(request: SocialLinkRequest):
     result["source_url"] = str(request.url)
     result["extracted_image_url"] = image_url
     return result
+
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+
+
+@app.get("/", include_in_schema=False)
+def serve_root():
+    index_file = ROOT_DIR / "index.html"
+    if index_file.is_file():
+        return FileResponse(index_file)
+    return {"status": "online", "mode": "dual-model-ensemble"}
+
+
+@app.get("/analyze", include_in_schema=False)
+@app.get("/analyze.html", include_in_schema=False)
+def serve_analyze_page():
+    path = ROOT_DIR / "analyze.html"
+    if path.is_file():
+        return FileResponse(path)
+    return serve_root()
+
+
+@app.get("/reports", include_in_schema=False)
+@app.get("/reports.html", include_in_schema=False)
+def serve_reports_page():
+    path = ROOT_DIR / "reports.html"
+    if path.is_file():
+        return FileResponse(path)
+    return serve_root()
+
+
+@app.get("/history", include_in_schema=False)
+@app.get("/history.html", include_in_schema=False)
+def serve_history_page():
+    path = ROOT_DIR / "history.html"
+    if path.is_file():
+        return FileResponse(path)
+    return serve_root()
+
+
+@app.get("/how-it-works", include_in_schema=False)
+@app.get("/how-it-works.html", include_in_schema=False)
+def serve_how_it_works_page():
+    path = ROOT_DIR / "how-it-works.html"
+    if path.is_file():
+        return FileResponse(path)
+    return serve_root()
+
+
+if (ROOT_DIR / "index.html").is_file():
+    app.mount("/", StaticFiles(directory=ROOT_DIR, html=True), name="static-root")

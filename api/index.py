@@ -103,7 +103,9 @@ def fetch_public_url(client: httpx.Client, url: str) -> httpx.Response:
         try:
             response = client.get(current_url, follow_redirects=False)
         except httpx.RequestError as exc:
-            raise HTTPException(400, f"Failed to connect to the linked URL: {exc}") from exc
+            raise HTTPException(
+                400, f"Failed to connect to the linked URL: {exc}"
+            ) from exc
 
         if response.is_redirect:
             location = response.headers.get("location")
@@ -113,7 +115,9 @@ def fetch_public_url(client: httpx.Client, url: str) -> httpx.Response:
             continue
 
         if response.status_code != 200:
-            raise HTTPException(400, f"The linked resource returned HTTP {response.status_code}.")
+            raise HTTPException(
+                400, f"The linked resource returned HTTP {response.status_code}."
+            )
 
         if int(response.headers.get("content-length", 0) or 0) > MAX_REMOTE_IMAGE_BYTES:
             raise HTTPException(413, "The linked image is too large (max 4 MB).")
@@ -247,14 +251,18 @@ def detect_and_crop_face(image: Image.Image) -> tuple[Image.Image, bool]:
         return image, False
 
 
-def query_hf_model(client: InferenceClient, image_bytes: bytes, model: str) -> list | None:
+def query_hf_model(
+    client: InferenceClient, image_bytes: bytes, model: str
+) -> list | None:
     """Queries Hugging Face serverless inference API for image classification."""
     try:
         results = client.image_classification(image_bytes, model=model)
         if results and isinstance(results, list):
             return results
     except Exception as exc:
-        logger.info("HF model %s unavailable, using local forensic analyzer: %s", model, exc)
+        logger.info(
+            "HF model %s unavailable, using local forensic analyzer: %s", model, exc
+        )
     return None
 
 
@@ -279,7 +287,9 @@ def safe_float(val: float, default: float = 0.5) -> float:
     return float(val)
 
 
-def compute_forensic_frequency_metrics(image: Image.Image) -> tuple[float, float, float]:
+def compute_forensic_frequency_metrics(
+    image: Image.Image,
+) -> tuple[float, float, float]:
     """Computes pure NumPy/Pillow 2D FFT spectral anomaly, edge variance, and color gradient covariance."""
     # 1. 2D Fast Fourier Transform (FFT) Power Spectrum Analysis
     resized = image.convert("L").resize((256, 256), Image.Resampling.BILINEAR)
@@ -303,7 +313,9 @@ def compute_forensic_frequency_metrics(image: Image.Image) -> tuple[float, float
     else:
         spectral_ratio = float(high_energy / (low_energy + 1e-5))
 
-    spectral_score = safe_float(np.clip((spectral_ratio - 0.70) / 0.50, 0.05, 0.95), 0.5)
+    spectral_score = safe_float(
+        np.clip((spectral_ratio - 0.70) / 0.50, 0.05, 0.95), 0.5
+    )
 
     # 2. Laplacian Edge Energy / Gradient Consistency
     edges = image.convert("L").filter(ImageFilter.FIND_EDGES)
@@ -370,7 +382,9 @@ def analyze_image(image_bytes: bytes) -> dict:
     else:
         # High-precision forensic fallback: 2D FFT + Edge + Color covariance
         spec, edge, col = compute_forensic_frequency_metrics(image)
-        global_ai_score = float(np.clip(0.45 * spec + 0.30 * edge + 0.25 * col, 0.05, 0.95))
+        global_ai_score = float(
+            np.clip(0.45 * spec + 0.30 * edge + 0.25 * col, 0.05, 0.95)
+        )
 
     # 2. Model B: Facial Deepfake Detector (prithivMLmods/Deepfake-Detect-Siglip2)
     face_fake_score = 0.0
@@ -404,7 +418,9 @@ def analyze_image(image_bytes: bytes) -> dict:
         f"{MODEL_FACIAL_DEEPFAKE} (Facial Manipulation)",
     ]
     if not used_hf:
-        ensemble_desc.append("High-Precision 2D FFT & Artifact Analyzer (Forensic Fallback)")
+        ensemble_desc.append(
+            "High-Precision 2D FFT & Artifact Analyzer (Forensic Fallback)"
+        )
 
     return {
         "verdict": (
@@ -421,7 +437,9 @@ def analyze_image(image_bytes: bytes) -> dict:
         "model_ensemble": ensemble_desc,
         "frames_analyzed": 1,
         "evidence_frame_base64": evidence_b64,
-        "inference_provider": "huggingface-cloud" if used_hf else "forensic-frequency-ensemble",
+        "inference_provider": (
+            "huggingface-cloud" if used_hf else "forensic-frequency-ensemble"
+        ),
     }
 
 
@@ -432,7 +450,9 @@ def health_check():
         "mode": "dual-model-ensemble",
         "architecture": "lightweight-serverless",
         "models": [MODEL_GLOBAL_AI, MODEL_FACIAL_DEEPFAKE],
-        "hf_token_configured": bool(os.getenv("HF_TOKEN") or os.getenv("HUGGING_FACE_HUB_TOKEN")),
+        "hf_token_configured": bool(
+            os.getenv("HF_TOKEN") or os.getenv("HUGGING_FACE_HUB_TOKEN")
+        ),
     }
 
 

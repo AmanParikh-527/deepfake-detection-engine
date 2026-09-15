@@ -24,8 +24,7 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from huggingface_hub import InferenceClient
-from PIL import Image, ImageFilter, UnidentifiedImageError
+from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, HttpUrl
 
 logger = logging.getLogger("truesight")
@@ -475,7 +474,6 @@ def analyze_social_image(request: SocialLinkRequest):
     return result
 
 
-# Static file serving for standalone and Vercel dev
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
 

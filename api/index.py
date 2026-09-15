@@ -20,7 +20,7 @@ from urllib.parse import urljoin, urlparse
 
 import httpx
 import numpy as np
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, HTTPException, Request, Response, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -39,7 +39,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -475,8 +475,12 @@ def analyze_image(image_bytes: bytes) -> dict:
     }
 
 
-@app.get("/api")
-@app.get("/api/health")
+@app.api_route("/api", methods=["GET", "HEAD"])
+@app.api_route("/api/", methods=["GET", "HEAD"])
+@app.api_route("/api/health", methods=["GET", "HEAD"])
+@app.api_route("/api/health/", methods=["GET", "HEAD"])
+@app.api_route("/health", methods=["GET", "HEAD"])
+@app.api_route("/health/", methods=["GET", "HEAD"])
 def health_check():
     return {
         "status": "online",
@@ -492,8 +496,15 @@ def health_check():
 IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif", ".tiff", ".avif")
 
 
-@app.post("/api/analyze-deepfake")
-async def analyze_uploaded_image(file: UploadFile = File(...)):
+@app.api_route("/api/analyze-deepfake", methods=["POST", "OPTIONS"])
+@app.api_route("/api/analyze-deepfake/", methods=["POST", "OPTIONS"])
+@app.api_route("/analyze-deepfake", methods=["POST", "OPTIONS"])
+@app.api_route("/analyze-deepfake/", methods=["POST", "OPTIONS"])
+async def analyze_uploaded_image(request: Request, file: UploadFile = File(None)):
+    if request.method == "OPTIONS":
+        return Response(status_code=200)
+    if file is None:
+        raise HTTPException(400, "Please provide an image file to analyze.")
     content_type = (file.content_type or "").lower()
     filename = (file.filename or "").lower()
     is_image = content_type.startswith("image/") or any(
@@ -507,11 +518,18 @@ async def analyze_uploaded_image(file: UploadFile = File(...)):
     return analyze_image(content)
 
 
-@app.post("/api/analyze-social-image")
-def analyze_social_image(request: SocialLinkRequest):
-    image_url, image_bytes = extract_open_graph_image(str(request.url))
+@app.api_route("/api/analyze-social-image", methods=["POST", "OPTIONS"])
+@app.api_route("/api/analyze-social-image/", methods=["POST", "OPTIONS"])
+@app.api_route("/analyze-social-image", methods=["POST", "OPTIONS"])
+@app.api_route("/analyze-social-image/", methods=["POST", "OPTIONS"])
+async def analyze_social_image(request: Request):
+    if request.method == "OPTIONS":
+        return Response(status_code=200)
+    data = await request.json()
+    req = SocialLinkRequest(**data)
+    image_url, image_bytes = extract_open_graph_image(str(req.url))
     result = analyze_image(image_bytes)
-    result["source_url"] = str(request.url)
+    result["source_url"] = str(req.url)
     result["extracted_image_url"] = image_url
     return result
 
@@ -520,6 +538,7 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 
 
 @app.get("/", include_in_schema=False)
+@app.get("/index.html", include_in_schema=False)
 def serve_root():
     index_file = ROOT_DIR / "index.html"
     if index_file.is_file():
@@ -563,5 +582,10 @@ def serve_how_it_works_page():
     return serve_root()
 
 
-if (ROOT_DIR / "index.html").is_file():
-    app.mount("/", StaticFiles(directory=ROOT_DIR, html=True), name="static-root")
+# Safe GET-only static file handler (never intercepts POST requests with 405)
+@app.get("/{filename:path}", include_in_schema=False)
+def serve_static_asset(filename: str):
+    file_path = (ROOT_DIR / filename).resolve()
+    if ROOT_DIR in file_path.parents and file_path.is_file():
+        return FileResponse(file_path)
+    raise HTTPException(404, "Not Found")

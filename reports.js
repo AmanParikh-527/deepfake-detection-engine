@@ -123,6 +123,7 @@ if (savedReport) {
 
   if (report.evidence_frame_base64) {
     const frame = document.querySelector("#media-frame");
+    frame.classList.add("has-image");
     frame.style.backgroundImage = `url(data:image/jpeg;base64,${report.evidence_frame_base64})`;
     frame.style.backgroundPosition = "center";
     frame.style.backgroundSize = "cover";
@@ -148,7 +149,13 @@ document
   .querySelector(".secondary-button")
   ?.addEventListener("click", (event) => {
     event.preventDefault();
-    const report = savedReport ? JSON.parse(savedReport) : {};
+    if (!savedReport) {
+      alert(
+        "No examination report found to download. Please analyze an image or link first.",
+      );
+      return;
+    }
+    const report = JSON.parse(savedReport);
     const score = Number(report.visual_confidence_score || 0).toFixed(1);
     const gScore =
       report.global_ai_score != null ? `${report.global_ai_score}%` : "N/A";

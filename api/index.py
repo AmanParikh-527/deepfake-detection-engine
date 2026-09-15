@@ -24,8 +24,9 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageFilter, UnidentifiedImageError
 from pydantic import BaseModel, HttpUrl
+from huggingface_hub import InferenceClient
 
 logger = logging.getLogger("truesight")
 logging.basicConfig(level=logging.INFO)
@@ -50,7 +51,9 @@ MAX_IMAGE_PIXELS = 25_000_000
 MODEL_GLOBAL_AI = "umm-maybe/AI-image-detector"
 MODEL_FACIAL_DEEPFAKE = "prithivMLmods/Deepfake-Detect-Siglip2"
 
-CASCADE_PATH = Path(__file__).with_name("haarcascade_frontalface_default.xml")
+CASCADE_PATH = Path(__file__).resolve().parent / "haarcascade_frontalface_default.xml"
+if not CASCADE_PATH.is_file():
+    CASCADE_PATH = Path.cwd() / "api" / "haarcascade_frontalface_default.xml"
 if not CASCADE_PATH.is_file():
     CASCADE_PATH = Path(__file__).parent / "haarcascade_frontalface_default.xml"
 
@@ -148,7 +151,19 @@ def extract_open_graph_image(post_url: str) -> tuple[str, bytes]:
         content_type = initial_resp.headers.get("content-type", "").lower()
 
         # 1. Direct image link
-        if content_type.startswith("image/"):
+        IMAGE_EXTS = (
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".webp",
+            ".bmp",
+            ".gif",
+            ".tiff",
+            ".avif",
+        )
+        if content_type.startswith("image/") or any(
+            parsed.path.lower().endswith(ext) for ext in IMAGE_EXTS
+        ):
             return str(initial_resp.url), initial_resp.content
 
         # 2. Web page / Social post preview extraction
@@ -268,14 +283,32 @@ def query_hf_model(
 def extract_score_from_hf_results(results: list, fake_labels: tuple[str, ...]) -> float:
     """Extract probability score for fake/artificial labels."""
     for item in results:
-        label = item.get("label", "").lower()
+        label = str(
+            item.get("label", "")
+            if isinstance(item, dict)
+            else getattr(item, "label", "")
+        ).lower()
+        score = float(
+            item.get("score", 0.0)
+            if isinstance(item, dict)
+            else getattr(item, "score", 0.0)
+        )
         if any(fl in label for fl in fake_labels):
-            return float(item.get("score", 0.0))
+            return score
     # If binary and label is real, return 1 - real_score
     for item in results:
-        label = item.get("label", "").lower()
+        label = str(
+            item.get("label", "")
+            if isinstance(item, dict)
+            else getattr(item, "label", "")
+        ).lower()
+        score = float(
+            item.get("score", 0.0)
+            if isinstance(item, dict)
+            else getattr(item, "score", 0.0)
+        )
         if "real" in label or "human" in label or "authentic" in label:
-            return 1.0 - float(item.get("score", 0.0))
+            return 1.0 - score
     return 0.0
 
 
@@ -442,6 +475,7 @@ def analyze_image(image_bytes: bytes) -> dict:
     }
 
 
+@app.get("/api")
 @app.get("/api/health")
 def health_check():
     return {
@@ -455,9 +489,17 @@ def health_check():
     }
 
 
+IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp", ".bmp", ".gif", ".tiff", ".avif")
+
+
 @app.post("/api/analyze-deepfake")
 async def analyze_uploaded_image(file: UploadFile = File(...)):
-    if not file.content_type or not file.content_type.startswith("image/"):
+    content_type = (file.content_type or "").lower()
+    filename = (file.filename or "").lower()
+    is_image = content_type.startswith("image/") or any(
+        filename.endswith(ext) for ext in IMAGE_EXTENSIONS
+    )
+    if not is_image:
         raise HTTPException(400, "Only image uploads are supported.")
     content = await file.read(MAX_UPLOAD_BYTES + 1)
     if len(content) > MAX_UPLOAD_BYTES:

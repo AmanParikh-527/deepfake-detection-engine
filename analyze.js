@@ -100,6 +100,17 @@ select("#analyze-button").addEventListener("click", async () => {
   });
   setProgress(15, 1, `Uploading and validating ${mediaType.toLowerCase()}`);
 
+  let progressStep = 1;
+  const progressTimer = setInterval(() => {
+    if (progressStep === 1) {
+      progressStep = 2;
+      setProgress(45, 2, "Extracting facial and forensic regions");
+    } else if (progressStep === 2) {
+      progressStep = 3;
+      setProgress(75, 3, "Running dual-model ensemble analysis");
+    }
+  }, 1200);
+
   const apiBase = window.API_BASE_URL || "";
   try {
     let response;
@@ -117,11 +128,27 @@ select("#analyze-button").addEventListener("click", async () => {
         body: formData,
       });
     }
+    clearInterval(progressTimer);
+
     const result = await response.json().catch(() => ({}));
-    if (!response.ok)
-      throw new Error(
-        result.detail || result.error || "The analysis could not be completed.",
-      );
+    if (!response.ok) {
+      let errorMsg = "The analysis could not be completed.";
+      if (result) {
+        if (typeof result.detail === "string") {
+          errorMsg = result.detail;
+        } else if (Array.isArray(result.detail)) {
+          errorMsg = result.detail
+            .map((err) => err.msg || JSON.stringify(err))
+            .join("; ");
+        } else if (result.error) {
+          errorMsg =
+            typeof result.error === "string"
+              ? result.error
+              : JSON.stringify(result.error);
+        }
+      }
+      throw new Error(errorMsg);
+    }
 
     setProgress(100, 4, "Preparing your report");
     const savedReport = {
@@ -142,13 +169,17 @@ select("#analyze-button").addEventListener("click", async () => {
       "truesight:reports",
       JSON.stringify([savedReport, ...history].slice(0, 20)),
     );
+    const completeCallout = select("#complete-callout");
+    if (completeCallout) completeCallout.hidden = false;
     window.location.href = "reports.html";
   } catch (error) {
+    clearInterval(progressTimer);
     select("#form-message").textContent =
       error.message || "Unable to reach the detection API.";
     select("#pipeline-name").textContent = "Analysis failed";
     setProgress(0, 0, "Ready when you are");
   } finally {
+    clearInterval(progressTimer);
     button.disabled = false;
     button.querySelector("span").textContent = "Analyze media";
   }
